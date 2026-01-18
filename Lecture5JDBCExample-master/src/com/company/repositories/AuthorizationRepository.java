@@ -16,7 +16,6 @@ public class AuthorizationRepository implements AuthorizationInterface {
 
     @Override
     public Integer login(String username, String password) {
-        // ВАЖНО: "User_ID" в кавычках, потому что у тебя колонка с заглавными буквами
         String sql = "SELECT \"User_ID\" FROM users WHERE username = ? AND password = ?";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
             st.setString(1, username);
@@ -46,9 +45,23 @@ public class AuthorizationRepository implements AuthorizationInterface {
                 }
             }
         } catch (Exception e) {
-            // например, username уже занят (unique)
             e.printStackTrace();
         }
         return null;
+
+        @Override
+        public String getUserRole(int id) {
+            try {
+                Connection con = db.getConnection();
+                String sql = "SELECT role FROM users WHERE id = ?";
+                PreparedStatement st = con.prepareStatement(sql);
+                st.setInt(1, id);
+                ResultSet rs = st.executeQuery();
+                if (rs.next()) return rs.getString("role");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return "user";
+        }
     }
 }

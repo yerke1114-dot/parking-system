@@ -5,6 +5,7 @@ public class User {
     private String name;
     private String surname;
     private boolean gender;
+    private String role;
 
     public User() {
 
@@ -14,10 +15,11 @@ public class User {
         setName(name);
         setSurname(surname);
         setGender(gender);
+        setRole(role);
     }
 
-    public User(int id, String name, String surname, boolean gender) {
-        this(name, surname, gender);
+    public User(int id, String name, String surname, boolean gender, String role) {
+        this(name, surname, gender, role);
         setId(id);
     }
 
@@ -49,6 +51,9 @@ public class User {
         this.gender = gender;
     }
 
+    public String getRole() {return role;}
+    public void setRole(String role) {this.role=role;}
+
     @Override
     public String toString() {
         return "User{" +
@@ -56,6 +61,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", gender=" + (gender ? "Male" : "Female") +
+                ", role='"+role+'\'' +
                 '}';
     }
 }
