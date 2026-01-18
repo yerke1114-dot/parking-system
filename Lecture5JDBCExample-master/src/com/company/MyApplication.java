@@ -2,7 +2,6 @@ package com.company;
 
 import com.company.controllers.interfaces.AuthorizationInterface;
 import com.company.repositories.interfaces.IParkingRepository;
-import com.company.repositories.interfaces.IAdminRepository;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -10,59 +9,19 @@ import java.util.Scanner;
 public class MyApplication {
 
     private final Scanner scanner = new Scanner(System.in);
+
     private final AuthorizationInterface auth;
     private final IParkingRepository parkingRepo;
-    private final IAdminRepository adminRepo;
 
-    public MyApplication(AuthorizationInterface auth, IParkingRepository parkingRepo, IAdminRepository adminRepo) {
+    public MyApplication(AuthorizationInterface auth, IParkingRepository parkingRepo) {
         this.auth = auth;
         this.parkingRepo = parkingRepo;
-        this.adminRepo = adminRepo;
     }
 
     public void start() {
         Integer userId = authMenu();
         if (userId == null) return;
 
-        String role = auth.getUserRole(userId);
-
-        if ("admin".equalsIgnoreCase(role)) {
-            adminMenu();
-        } else {
-            userMenu(userId);
-        }
-    }
-
-    private void adminMenu() {
-        while (true) {
-            System.out.println("\n--- ADMIN PANEL ---");
-            System.out.println("1. View all users");
-            System.out.println("2. Delete user by ID");
-            System.out.println("0. Exit");
-            System.out.print("Choice: ");
-
-            int option;
-            try {
-                option = scanner.nextInt();
-            } catch (InputMismatchException e) {
-                scanner.nextLine();
-                continue;
-            }
-
-            if (option == 0) return;
-
-            if (option == 1) {
-                System.out.println(adminRepo.getAllUsers());
-            } else if (option == 2) {
-                System.out.print("Enter ID to delete: ");
-                int id = scanner.nextInt();
-                if (adminRepo.deleteUser(id)) System.out.println("Done!");
-                else System.out.println("Failed!");
-            }
-        }
-    }
-
-    private void userMenu(Integer userId) {
         while (true) {
             System.out.println("\nWelcome to My Application!");
             System.out.println("Select option:");
@@ -87,19 +46,26 @@ public class MyApplication {
                 case 1:
                     System.out.println(parkingRepo.getMyParking(userId));
                     break;
+
                 case 2:
                     System.out.println(parkingRepo.getFreeParking());
                     break;
+
                 case 3:
                     System.out.println(parkingRepo.getFreeParking());
+
                     System.out.print("Enter spot number: ");
                     int spotNumber = scanner.nextInt();
+
                     System.out.print("Owner phone (11 digits): ");
                     String phone = scanner.next();
+
                     System.out.print("Car number (8 chars): ");
                     String car = scanner.next();
+
                     System.out.println(parkingRepo.buyParking(userId, spotNumber, phone, car));
                     break;
+
                 default:
                     System.out.println("Unknown option!");
             }
@@ -130,6 +96,7 @@ public class MyApplication {
 
             System.out.print("Username: ");
             String username = scanner.next();
+
             System.out.print("Password: ");
             String password = scanner.next();
 
