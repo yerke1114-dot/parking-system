@@ -24,7 +24,6 @@ public class User {
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -32,7 +31,6 @@ public class User {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -40,7 +38,6 @@ public class User {
     public String getSurname() {
         return surname;
     }
-
     public void setSurname(String surname) {
         this.surname = surname;
     }
@@ -48,7 +45,6 @@ public class User {
     public boolean getGender() {
         return gender;
     }
-
     public void setGender(boolean gender) {
         this.gender = gender;
     }

@@ -42,7 +42,6 @@ public class PostgresDB implements IDB {
     public String getHost() {
         return host;
     }
-
     public void setHost(String host) {
         this.host = host;
     }
@@ -50,7 +49,6 @@ public class PostgresDB implements IDB {
     public String getUsername() {
         return username;
     }
-
     public void setUsername(String username) {
         this.username = username;
     }
@@ -58,7 +56,6 @@ public class PostgresDB implements IDB {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -66,7 +63,6 @@ public class PostgresDB implements IDB {
     public String getDbName() {
         return dbName;
     }
-
     public void setDbName(String dbName) {
         this.dbName = dbName;
     }
