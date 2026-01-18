@@ -48,20 +48,5 @@ public class AuthorizationRepository implements AuthorizationInterface {
             e.printStackTrace();
         }
         return null;
-
-        @Override
-        public String getUserRole(int id) {
-            try {
-                Connection con = db.getConnection();
-                String sql = "SELECT role FROM users WHERE id = ?";
-                PreparedStatement st = con.prepareStatement(sql);
-                st.setInt(1, id);
-                ResultSet rs = st.executeQuery();
-                if (rs.next()) return rs.getString("role");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            return "user";
-        }
     }
 }
