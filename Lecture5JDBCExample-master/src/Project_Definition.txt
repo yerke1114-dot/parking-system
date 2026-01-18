@@ -1,13 +1,16 @@
 Parking Management System
 
-The Parking Management System is a Java application designed to automate basic parking tasks
-and illustrate fundamental software design principles such as Object-Oriented Programming,
-Layered Design, and the usage of databases.
+“Parking Management System” is a console application programmed by using Java
+to show how parking can be implemented as an example of object-oriented programming.
+This application is an educational model, giving more importance to a well-structured
+and layered architecture rather than an involved interface.
 
-This prototype provides a solution to the needs of data management in infrastructure systems.
-In contrast to commercial systems, this prototype gives a higher priority to clean architectural
-design and organization rather than unnecessary functionality.
+User authentication is a key module, which handles system functionalities using
+Role-Based Access Control (RBAC). Based on the role provided by the database,
+users are directed to access either a customized admin interface, handled by
+the AdminRep class, or a general interface.
 
-This application is built with Java and uses a layered design, isolating controllers,
-data access layers, models, and interfaces, making it highly readable, maintainable, and scalable.
-User login security is implemented to safeguard functionality, with PostgreSQL serving to store data through JDBC.
+All the data concerning users and parking areas is stored within a PostgreSQL database.
+The process of communication is implemented via the JDBC library. This project
+illustrates how infrastructure management software can also incorporate proper software
+design principles such as abstraction.
