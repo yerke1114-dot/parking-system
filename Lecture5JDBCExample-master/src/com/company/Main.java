@@ -6,8 +6,6 @@ import com.company.data.interfaces.IDB;
 import com.company.repositories.AuthorizationRepository;
 import com.company.repositories.ParkingRepository;
 import com.company.repositories.interfaces.IParkingRepository;
-import com.company.repositories.AdminRepository;
-import com.company.repositories.interfaces.IAdminRepository;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,9 +14,8 @@ public class Main {
 
         AuthorizationInterface auth = new AuthorizationRepository(db);
         IParkingRepository parkingRepo = new ParkingRepository(db);
-        IAdminRepository adminRepo = new AdminRep(db);
 
-        MyApplication app = new MyApplication(auth, parkingRepo, adminRepo);
+        MyApplication app = new MyApplication(auth, parkingRepo);
         app.start();
 
         db.close();
