@@ -76,8 +76,6 @@ public class ParkingRepository implements IParkingRepository {
     public String buyParking(int userId, int spotNumber, String ownerPhone, String carNumber) {
         if (!isPhoneValid(ownerPhone)) return "Owner phone must be exactly 11 digits!";
         if (!isCarNumberValid(carNumber)) return "Car number must be exactly 8 characters!";
-
-        // 1) Проверка: место существует?
         String existsSpot = "SELECT 1 FROM parking_spots WHERE spot_number = ?";
         try (PreparedStatement st = db.getConnection().prepareStatement(existsSpot)) {
             st.setInt(1, spotNumber);
@@ -89,8 +87,6 @@ public class ParkingRepository implements IParkingRepository {
         } catch (Exception e) {
             return "sql error: " + e.getMessage();
         }
-
-        // 2) Проверка: место уже занято (есть ACTIVE заказ)?
         String checkBusy = "SELECT 1 FROM parking_orders WHERE spot_number = ? AND status = 'ACTIVE'";
         try (PreparedStatement st = db.getConnection().prepareStatement(checkBusy)) {
             st.setInt(1, spotNumber);
@@ -102,8 +98,6 @@ public class ParkingRepository implements IParkingRepository {
         } catch (Exception e) {
             return "sql error: " + e.getMessage();
         }
-
-        // 3) Вставка заказа
         String insert =
                 "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status) " +
                         "VALUES (?, ?, ?, ?, 'ACTIVE')";

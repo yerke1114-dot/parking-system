@@ -12,12 +12,7 @@ import com.company.repositories.interfaces.IAdminRepository;
 public class Main {
     public static void main(String[] args) {
 
-        IDB db = new PostgresDB(
-                "jdbc:postgresql://localhost:5432",
-                "postgres",
-                "0000",
-                "Db1"
-        );
+        IDB db = new PostgresDB("jdbc:postgresql://localhost:5432", "postgres", "0000", "Db1");
 
         AuthorizationInterface auth = new AuthorizationRepository(db);
         IParkingRepository parkingRepo = new ParkingRepository(db);
