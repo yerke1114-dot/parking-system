@@ -46,7 +46,6 @@ public class ParkingRepository implements IParkingRepository {
 
     @Override
     public String getFreeParking() {
-        // свободные места = те, у которых нет ACTIVE заказа
         String sql =
                 "SELECT ps.spot_number, ps.\"Price\" " +
                         "FROM parking_spots ps " +
