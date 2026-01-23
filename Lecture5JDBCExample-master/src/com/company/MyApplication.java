@@ -122,46 +122,24 @@ public class MyApplication {
         int months = askMonths();
 
         int price = calcPrice(months);
+        System.out.println("Selected plan: " + (months == 0 ? "FOREVER" : months + " month(s)") + " | Price: " + price + "$");
 
-        String planLabel = (months == 0)
-                ? "FOREVER"
-                : months + " month(s)";
-
-        System.out.println(
-                "Selected plan: " + planLabel +
-                        " | Price: $" + price
-        );
-
-        System.out.println(
-                parkingRepo.buyParking(userId, spotNumber, phone, car, months)
-        );
+        System.out.println(parkingRepo.buyParking(userId, spotNumber, phone, car, months));
     }
 
     private int askMonths() {
         while (true) {
-            System.out.print("Choose plan (0 = Forever, 1 / 3 / 6 months): ");
-
+            System.out.print("Choose plan (0=Forever, 1 / 3 / 6 months): ");
             try {
                 int months = scanner.nextInt();
-
-                boolean validPlan =
-                        months == 0 ||
-                                months == 1 ||
-                                months == 3 ||
-                                months == 6;
-
-                if (validPlan) {
-                    return months;
-                }
-
-                System.out.println("Only 0, 1, 3 or 6 are allowed!");
+                if (months == 0 || months == 1 || months == 3 || months == 6) return months;
+                System.out.println("Only 0, 1, 3 or 6 allowed!");
             } catch (InputMismatchException e) {
-                System.out.println("Plan must be an integer value!");
-                scanner.nextLine(); // clear invalid input
+                System.out.println("Plan must be integer!");
+                scanner.nextLine();
             }
         }
     }
-
 
 
     private int calcPrice(int months) {
