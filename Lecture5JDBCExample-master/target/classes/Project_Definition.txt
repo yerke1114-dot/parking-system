@@ -1,0 +1,12 @@
+Parking Management System is a Java console application
+for managing parking spot rentals in a small parking area.
+The system uses PostgreSQL (via JDBC) to store users, parking spots,
+and parking orders. Users can register or log in, view their
+active parking zone, see all free parking zones, and rent a spot
+for 1, 3, or 6 months with fixed pricing (200$, 550$, 1000$) or buy
+a spot forever (5000$). The application validates input (phone number
+length 11, car number length 8) and prevents renting an already occupied spot.
+An admin account can view the full parking status: all spots, current owner,
+rental status, and end date (or “FOREVER” for permanent purchases).
+he project demonstrates layered architecture (models, repositories, interfaces),
+basic authentication, and database-driven CRUD operations.
