@@ -68,7 +68,10 @@ public class MyApplication {
                     ? auth.login(username, password)
                     : auth.register(username, password);
 
+            if (user != null) return user;
 
+            if (choice == 1) System.out.println("Wrong username or password!");
+            else System.out.println("Registration failed (maybe username already exists).");
         }
     }
 
