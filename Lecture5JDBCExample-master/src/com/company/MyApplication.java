@@ -69,11 +69,10 @@ public class MyApplication {
                 return null;
             }
 
-
-            System.out.print("Username: ");
+            System.out.print("Enter username: ");
             String username = scanner.next();
 
-            System.out.print("Password: ");
+            System.out.print("Enter password: ");
             String password = scanner.next();
 
             AuthUser user = (choice == 1)
