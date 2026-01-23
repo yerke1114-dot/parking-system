@@ -75,11 +75,11 @@ public class ParkingRepository implements IParkingRepository {
 
     @Override
     public String buyParking(int userId, int spotNumber, String ownerPhone, String carNumber, int months) {
+        boolean isValidPlan = (months == 0 || months == 1 || months == 3 || months == 6);
 
-        if (months != 0 && months != 1 && months != 3 && months != 6) {
-            return "Plan must be 0 (forever), 1, 3 or 6!";
+        if (!isValidPlan) {
+            return "Invalid rental plan! Please choose: 0 (Forever), 1, 3, or 6 months.";
         }
-
 
         if (!isPhoneValid(ownerPhone)) return "Owner phone must be exactly 11 digits!";
         if (!isCarNumberValid(carNumber)) return "Car number must be exactly 8 characters!";
@@ -136,17 +136,20 @@ public class ParkingRepository implements IParkingRepository {
             return "sql error: " + e.getMessage();
         }
     }
-
     private boolean isPhoneValid(String phone) {
-        if (phone == null) return false;
-        if (phone.length() != 11) return false;
-        for (int i = 0; i < phone.length(); i++) {
-            if (!Character.isDigit(phone.charAt(i))) return false;
+        if (phone == null || phone.length() != 11) {
+            return false;
+        }
+        for (char c : phone.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false;
+            }
         }
         return true;
     }
 
     private boolean isCarNumberValid(String car) {
-        return car != null && car.length() == 8;
+        if (car == null) return false;
+        return car.length() == 8;
     }
 }

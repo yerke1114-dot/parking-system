@@ -16,12 +16,13 @@ public class MyApplication {
     private final IParkingRepository parkingRepo;
     private final AdminRepository adminRepo;
 
-    public MyApplication(AuthorizationInterface auth, IParkingRepository parkingRepo, AdminRepository adminRepo) {
+    public MyApplication(AuthorizationInterface auth,
+                         IParkingRepository parkingRepo,
+                         AdminRepository adminRepo) {
         this.auth = auth;
         this.parkingRepo = parkingRepo;
         this.adminRepo = adminRepo;
     }
-
     public void start() {
         while (true) {
             AuthUser user = authMenu();
@@ -38,30 +39,40 @@ public class MyApplication {
 
     private AuthUser authMenu() {
         while (true) {
-            System.out.println("\n1. Login");
+            System.out.println();
+            System.out.println("1. Login");
             System.out.println("2. Register");
             System.out.println("0. Exit");
             System.out.print("Choose: ");
 
             int choice;
+
             try {
                 choice = scanner.nextInt();
             } catch (InputMismatchException e) {
-                System.out.println("Input must be integer!");
-                scanner.nextLine();
+                System.out.println("Input must be an integer value!");
+                scanner.nextLine(); // clear invalid input
                 continue;
             }
 
-            if (choice == 0) return null;
-            if (choice != 1 && choice != 2) {
+            boolean validChoice =
+                    choice == 0 ||
+                            choice == 1 ||
+                            choice == 2;
+
+            if (!validChoice) {
                 System.out.println("Choose 1, 2 or 0");
                 continue;
             }
 
-            System.out.print("Username: ");
+            if (choice == 0) {
+                return null;
+            }
+
+            System.out.print("Enter username: ");
             String username = scanner.next();
 
-            System.out.print("Password: ");
+            System.out.print("Enter password: ");
             String password = scanner.next();
 
             AuthUser user = (choice == 1)
