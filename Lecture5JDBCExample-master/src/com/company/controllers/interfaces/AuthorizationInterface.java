@@ -1,6 +1,9 @@
 package com.company.controllers.interfaces;
 
+import com.company.models.AuthUser;
+
 public interface AuthorizationInterface {
-    Integer login(String username, String password);
-    Integer register(String username, String password);
+    AuthUser login(String username, String password);
+    AuthUser register(String username, String password);
 }
+

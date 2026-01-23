@@ -2,6 +2,7 @@ package com.company.repositories;
 
 import com.company.controllers.interfaces.AuthorizationInterface;
 import com.company.data.interfaces.IDB;
+import com.company.models.AuthUser;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,15 +16,19 @@ public class AuthorizationRepository implements AuthorizationInterface {
     }
 
     @Override
-    public Integer login(String username, String password) {
-        String sql = "SELECT \"User_ID\" FROM users WHERE username = ? AND password = ?";
+    public AuthUser login(String username, String password) {
+        String sql = "SELECT \"User_ID\", username, role FROM users WHERE username = ? AND password = ?";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
             st.setString(1, username);
             st.setString(2, password);
 
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("User_ID");
+                    return new AuthUser(
+                            rs.getInt("User_ID"),
+                            rs.getString("username"),
+                            rs.getString("role")
+                    );
                 }
             }
         } catch (Exception e) {
@@ -33,15 +38,19 @@ public class AuthorizationRepository implements AuthorizationInterface {
     }
 
     @Override
-    public Integer register(String username, String password) {
-        String sql = "INSERT INTO users(username, password) VALUES (?, ?) RETURNING \"User_ID\"";
+    public AuthUser register(String username, String password) {
+        String sql = "INSERT INTO users(username, password) VALUES (?, ?) RETURNING \"User_ID\", username, role";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
             st.setString(1, username);
             st.setString(2, password);
 
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("User_ID");
+                    return new AuthUser(
+                            rs.getInt("User_ID"),
+                            rs.getString("username"),
+                            rs.getString("role")
+                    );
                 }
             }
         } catch (Exception e) {

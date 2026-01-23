@@ -17,7 +17,7 @@ public class ParkingRepository implements IParkingRepository {
     @Override
     public String getMyParking(int userId) {
         String sql =
-                "SELECT po.id, po.spot_number, po.owner_phone, po.car_number, po.status " +
+                "SELECT po.id, po.spot_number, po.owner_phone, po.car_number, po.status, po.start_date, po.end_date " +
                         "FROM parking_orders po " +
                         "WHERE po.\"User_ID\" = ? AND po.status = 'ACTIVE' " +
                         "ORDER BY po.id";
@@ -34,6 +34,7 @@ public class ParkingRepository implements IParkingRepository {
                             .append(" | Phone: ").append(rs.getString("owner_phone"))
                             .append(" | Car: ").append(rs.getString("car_number"))
                             .append(" | Status: ").append(rs.getString("status"))
+                            .append(" | End: ").append(rs.getTimestamp("end_date"))
                             .append("\n");
                 }
             }
@@ -62,7 +63,7 @@ public class ParkingRepository implements IParkingRepository {
 
             while (rs.next()) {
                 sb.append("Spot: ").append(rs.getInt("spot_number"))
-                        .append(" | Price: ").append(rs.getInt("Price"))
+                        .append(" | Base Price: ").append(rs.getInt("Price"))
                         .append("$\n");
             }
         } catch (Exception e) {
@@ -73,34 +74,49 @@ public class ParkingRepository implements IParkingRepository {
     }
 
     @Override
-    public String buyParking(int userId, int spotNumber, String ownerPhone, String carNumber) {
+    public String buyParking(int userId, int spotNumber, String ownerPhone, String carNumber, int months) {
+
+        if (months != 0 && months != 1 && months != 3 && months != 6) {
+            return "Plan must be 0 (forever), 1, 3 or 6!";
+        }
+
+
         if (!isPhoneValid(ownerPhone)) return "Owner phone must be exactly 11 digits!";
         if (!isCarNumberValid(carNumber)) return "Car number must be exactly 8 characters!";
+
         String existsSpot = "SELECT 1 FROM parking_spots WHERE spot_number = ?";
         try (PreparedStatement st = db.getConnection().prepareStatement(existsSpot)) {
             st.setInt(1, spotNumber);
             try (ResultSet rs = st.executeQuery()) {
-                if (!rs.next()) {
-                    return "This parking spot does not exist!";
-                }
+                if (!rs.next()) return "This parking spot does not exist!";
             }
         } catch (Exception e) {
             return "sql error: " + e.getMessage();
         }
+
+
         String checkBusy = "SELECT 1 FROM parking_orders WHERE spot_number = ? AND status = 'ACTIVE'";
         try (PreparedStatement st = db.getConnection().prepareStatement(checkBusy)) {
             st.setInt(1, spotNumber);
             try (ResultSet rs = st.executeQuery()) {
-                if (rs.next()) {
-                    return "This parking spot is already occupied!";
-                }
+                if (rs.next()) return "This parking spot is already occupied!";
             }
         } catch (Exception e) {
             return "sql error: " + e.getMessage();
         }
-        String insert =
-                "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status) " +
-                        "VALUES (?, ?, ?, ?, 'ACTIVE')";
+
+
+        String insert;
+
+        if (months == 0) {
+            insert =
+                    "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status, start_date, end_date) " +
+                            "VALUES (?, ?, ?, ?, 'ACTIVE', now(), NULL)";
+        } else {
+            insert =
+                    "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status, start_date, end_date) " +
+                            "VALUES (?, ?, ?, ?, 'ACTIVE', now(), now() + (? || ' months')::interval)";
+        }
 
         try (PreparedStatement st = db.getConnection().prepareStatement(insert)) {
             st.setInt(1, userId);
@@ -108,23 +124,29 @@ public class ParkingRepository implements IParkingRepository {
             st.setString(3, ownerPhone);
             st.setString(4, carNumber);
 
+            if (months != 0) {
+                st.setInt(5, months);
+            }
+
             int rows = st.executeUpdate();
-            if (rows > 0) return "Parking bought successfully!";
-            return "Buy parking failed!";
+            return rows > 0
+                    ? (months == 0 ? "Parking bought forever for 5000$!" : "Parking rented for " + months + " month(s)!")
+                    : "Operation failed!";
         } catch (Exception e) {
             return "sql error: " + e.getMessage();
         }
     }
 
     private boolean isPhoneValid(String phone) {
-        if (phone == null || phone.length() != 11) return false;
+        if (phone == null) return false;
+        if (phone.length() != 11) return false;
         for (int i = 0; i < phone.length(); i++) {
             if (!Character.isDigit(phone.charAt(i))) return false;
         }
         return true;
     }
 
-    private boolean isCarNumberValid(String carNumber) {
-        return carNumber != null && carNumber.length() == 8;
+    private boolean isCarNumberValid(String car) {
+        return car != null && car.length() == 8;
     }
 }
