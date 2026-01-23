@@ -38,25 +38,36 @@ public class MyApplication {
 
     private AuthUser authMenu() {
         while (true) {
-            System.out.println("\n1. Login");
+            System.out.println();
+            System.out.println("1. Login");
             System.out.println("2. Register");
             System.out.println("0. Exit");
             System.out.print("Choose: ");
 
             int choice;
+
             try {
                 choice = scanner.nextInt();
             } catch (InputMismatchException e) {
-                System.out.println("Input must be integer!");
-                scanner.nextLine();
+                System.out.println("Input must be an integer value!");
+                scanner.nextLine(); // clear invalid input
                 continue;
             }
 
-            if (choice == 0) return null;
-            if (choice != 1 && choice != 2) {
+            boolean validChoice =
+                    choice == 0 ||
+                            choice == 1 ||
+                            choice == 2;
+
+            if (!validChoice) {
                 System.out.println("Choose 1, 2 or 0");
                 continue;
             }
+
+            if (choice == 0) {
+                return null;
+            }
+
 
             System.out.print("Username: ");
             String username = scanner.next();
