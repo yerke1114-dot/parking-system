@@ -16,12 +16,13 @@ public class MyApplication {
     private final IParkingRepository parkingRepo;
     private final AdminRepository adminRepo;
 
-    public MyApplication(AuthorizationInterface auth, IParkingRepository parkingRepo, AdminRepository adminRepo) {
+    public MyApplication(AuthorizationInterface auth,
+                         IParkingRepository parkingRepo,
+                         AdminRepository adminRepo) {
         this.auth = auth;
         this.parkingRepo = parkingRepo;
         this.adminRepo = adminRepo;
     }
-
     public void start() {
         while (true) {
             AuthUser user = authMenu();
