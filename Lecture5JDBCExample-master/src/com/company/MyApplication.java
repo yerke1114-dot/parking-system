@@ -92,11 +92,11 @@ public class MyApplication {
         int months = ParkingUI.readInt("Plan (0=Forever, 1, 3, 6 months)");
         int price = ParkingUI.calculatePrice(months);
 
-        System.out.println(" 💵 Final Price: " + price + "$");
-        System.out.println(" ⏳ Finalizing transaction...");
+        System.out.println("Final Price: " + price + "$");
+        System.out.println("Finalizing transaction...");
 
         String result = parkingRepo.buyParking(userId, spot, phone, car, months);
-        System.out.println(" ✨ " + result);
+        System.out.println(result);
     }
 
     private void adminMenu() {
