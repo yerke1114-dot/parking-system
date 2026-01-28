@@ -68,7 +68,12 @@ public class MyApplication {
     private void userMenu(AuthUser user) {
         while (true) {
             ParkingUI.printHeader("RESIDENT DASHBOARD | ID: " + user.getUserId());
-            System.out.println(" [1] View My Spots\n [2] Find Free Zones\n [3] Purchase Parking\n [0] Logout");
+            System.out.println(" [1] View My Spots");
+            System.out.println(" [2] Find Free Zones");
+            System.out.println(" [3] Purchase Parking");
+            System.out.println(" [4] Cancel Order");
+            System.out.println(" [5] Extend Order");
+            System.out.println(" [0] Logout");
             int option = ParkingUI.readInt("Action");
             if (option == 0) return;
 
@@ -76,9 +81,29 @@ public class MyApplication {
                 case 1 -> System.out.println(parkingRepo.getMyParking(user.getUserId()));
                 case 2 -> System.out.println(parkingRepo.getFreeParking());
                 case 3 -> buyParkingFlow(user.getUserId());
+                case 4 -> cancelParkingFlow(user.getUserId());
+                case 5 -> extendParkingFlow(user.getUserId());
                 default -> System.out.println(" [!] Invalid choice.");
             }
         }
+    }
+    private void cancelParkingFlow(int userId) {
+        ParkingUI.printHeader("CANCEL ORDER");
+        int spot = ParkingUI.readInt("Enter Spot Number to release");
+
+        System.out.println("Processing cancellation...");
+        String result = parkingRepo.cancelOrder(userId, spot);
+        System.out.println(result);
+    }
+
+    private void extendParkingFlow(int userId) {
+        ParkingUI.printHeader("EXTEND LEASE");
+        int spot = ParkingUI.readInt("Enter Spot Number to extend");
+        int months = ParkingUI.readInt("How many extra months?");
+
+        System.out.println("Updating lease term...");
+        String result = parkingRepo.extendOrder(userId, spot, months);
+        System.out.println(result);
     }
 
     private void buyParkingFlow(int userId) {
