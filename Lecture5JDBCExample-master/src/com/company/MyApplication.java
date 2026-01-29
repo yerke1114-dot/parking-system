@@ -106,26 +106,26 @@ public class MyApplication {
                     break;
                 case 5:
                     String myParkingInfo = parkingRepo.getMyParking(user.getUserId());
-
                     if (myParkingInfo.toLowerCase().contains("no active parking")) {
-                        System.out.println("\n[!] You don't have any active orders to extend.");
+                        System.out.println("\n[!] Error: You don't have any active orders to extend.");
                     } else {
-                        System.out.println("\n--- Your Active Parking ---");
+                        System.out.println("\n--- Your Active Orders ---");
                         System.out.println(myParkingInfo);
 
                         System.out.print("Enter the Spot Number you want to extend: ");
                         int spotToExtend = scanner.nextInt();
+                        if (!myParkingInfo.contains("Spot: " + spotToExtend)) {
+                            System.out.println("\n[!] Error: Spot #" + spotToExtend + " is not your car spot!");
+                            System.out.println("[i] Action cancelled. Please enter the correct Spot Number (e.g., 33).");
+                        } else {
+                            System.out.print("How many extra months (1, 3, 6)?: ");
+                            int extraMonths = scanner.nextInt();
 
-                        System.out.print("How many extra months (1, 3, 6)?: ");
-                        int extraMonths = scanner.nextInt();
-
-                        System.out.println("Processing extension...");
-                        String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
-                        System.out.println(result);
+                            System.out.println("Processing extension...");
+                            String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
+                            System.out.println(result);
+                        }
                     }
-                    break;
-                default:
-                    System.out.println("[!] Invalid choice.");
                     break;
             }
         }
