@@ -116,14 +116,29 @@ public class MyApplication {
                         int spotToExtend = scanner.nextInt();
                         if (!myParkingInfo.contains("Spot: " + spotToExtend)) {
                             System.out.println("\n[!] Error: Spot #" + spotToExtend + " is not your car spot!");
-                            System.out.println("[i] Action cancelled. Please enter the correct Spot Number (e.g., 33).");
+                            System.out.println("[i] Action cancelled. Please enter the correct Spot Number.");
                         } else {
                             System.out.print("How many extra months (1, 3, 6)?: ");
                             int extraMonths = scanner.nextInt();
+                            scanner.nextLine();
+                            int pricePerMonth = 50;
+                            int totalCost = extraMonths * pricePerMonth;
+                            System.out.println("\n================================");
+                            System.out.println("       RENEWAL SUMMARY          ");
+                            System.out.println("  Spot Number:  " + spotToExtend);
+                            System.out.println("  Duration:     " + extraMonths + " Month(s)");
+                            System.out.println("  Total Price:  $" + totalCost);
+                            System.out.println("================================");
+                            System.out.print("Confirm payment and extend? (y/n): ");
+                            String confirm = scanner.next();
 
-                            System.out.println("Processing extension...");
-                            String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
-                            System.out.println(result);
+                            if (confirm.equalsIgnoreCase("y")) {
+                                System.out.println("\nProcessing extension...");
+                                String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
+                                System.out.println(result);
+                            } else {
+                                System.out.println("\n[INFO] Action cancelled. No charges applied.");
+                            }
                         }
                     }
                     break;
