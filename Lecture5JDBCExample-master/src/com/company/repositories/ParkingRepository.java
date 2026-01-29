@@ -59,18 +59,15 @@ public class ParkingRepository implements IParkingRepository {
             return st.executeUpdate() > 0 ? "Purchase successful!" : "Purchase failed!";
         } catch (Exception e) { return "SQL Error: " + e.getMessage(); }
     }
-
     private boolean isPhoneValid(String phone) {
         return phone != null && phone.length() == 11;
     }
-
     private boolean isCarNumberValid(String car) {
         return car != null && car.length() == 8;
     }
 
     @Override
     public String cancelOrder(int userId, int spotNumber) {
-        // 使用 DELETE 确保彻底释放车位，绕过 status 约束检查
         String sql = "DELETE FROM parking_orders WHERE \"User_ID\" = ? AND spot_number = ? AND status = 'ACTIVE'";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
             st.setInt(1, userId);
