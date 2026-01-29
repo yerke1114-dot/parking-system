@@ -78,12 +78,55 @@ public class MyApplication {
             if (option == 0) return;
 
             switch (option) {
-                case 1 -> System.out.println(parkingRepo.getMyParking(user.getUserId()));
-                case 2 -> System.out.println(parkingRepo.getFreeParking());
-                case 3 -> buyParkingFlow(user.getUserId());
-                case 4 -> cancelParkingFlow(user.getUserId());
-                case 5 -> extendParkingFlow(user.getUserId());
-                default -> System.out.println(" [!] Invalid choice.");
+                case 1:
+                    System.out.println(parkingRepo.getMyParking(user.getUserId()));
+                    break;
+                case 2:
+                    System.out.println(parkingRepo.getFreeParking());
+                    break;
+                case 3:
+                    buyParkingFlow(user.getUserId());
+                    break;
+                case 4:
+                    String activeParking = parkingRepo.getMyParking(user.getUserId());
+
+                    if (activeParking.toLowerCase().contains("no active parking")) {
+                        System.out.println("\n[!] You don't have any active orders to cancel.");
+                    } else {
+                        System.out.println("\n--- Your Active Orders ---");
+                        System.out.println(activeParking);
+
+                        System.out.print("Enter the Spot Number you want to CANCEL: ");
+                        int spotToCancel = scanner.nextInt();
+
+                        System.out.println("Processing cancellation...");
+                        String result = parkingRepo.cancelOrder(user.getUserId(), spotToCancel);
+                        System.out.println(result);
+                    }
+                    break;
+                case 5:
+                    String myParkingInfo = parkingRepo.getMyParking(user.getUserId());
+
+                    if (myParkingInfo.toLowerCase().contains("no active parking")) {
+                        System.out.println("\n[!] You don't have any active orders to extend.");
+                    } else {
+                        System.out.println("\n--- Your Active Parking ---");
+                        System.out.println(myParkingInfo);
+
+                        System.out.print("Enter the Spot Number you want to extend: ");
+                        int spotToExtend = scanner.nextInt();
+
+                        System.out.print("How many extra months (1, 3, 6)?: ");
+                        int extraMonths = scanner.nextInt();
+
+                        System.out.println("Processing extension...");
+                        String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
+                        System.out.println(result);
+                    }
+                    break;
+                default:
+                    System.out.println("[!] Invalid choice.");
+                    break;
             }
         }
     }

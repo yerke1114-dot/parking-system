@@ -33,18 +33,68 @@ public class ParkingRepository implements IParkingRepository {
 
     @Override
     public String getFreeParking() {
-        String sql = "SELECT ps.spot_number, ps.\"Price\", c.name FROM parking_spots ps " +
-                "JOIN categories c ON ps.category_id = c.id " +
-                "WHERE ps.spot_number NOT IN (SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE')";
+        String statsSql =
+                "SELECT c.name, COUNT(ps.spot_number) as available_count " +
+                        "FROM parking_spots ps " +
+                        "JOIN categories c ON ps.category_id = c.id " +
+                        "WHERE ps.spot_number NOT IN (SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') " +
+                        "GROUP BY c.name";
+
+        String detailSql =
+                "SELECT ps.spot_number, ps.\"Price\", c.name AS cat_name " +
+                        "FROM parking_spots ps " +
+                        "JOIN categories c ON ps.category_id = c.id " +
+                        "WHERE ps.spot_number NOT IN (SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') " +
+                        "ORDER BY c.name, ps.spot_number";
+
         StringBuilder sb = new StringBuilder();
-        try (PreparedStatement st = db.getConnection().prepareStatement(sql);
-             ResultSet rs = st.executeQuery()) {
-            while (rs.next()) {
-                sb.append("Spot: ").append(rs.getInt("spot_number"))
-                        .append(" | Type: ").append(rs.getString("name"))
-                        .append(" | Price: ").append(rs.getInt("Price")).append("$\n");
+
+        try (java.sql.Connection conn = db.getConnection()) {
+            sb.append("\n=========================================\n");
+            sb.append("         🅿️  PARKING DASHBOARD\n");
+            sb.append("=========================================\n");
+
+            try (PreparedStatement st = conn.prepareStatement(statsSql);
+                 ResultSet rs = st.executeQuery()) {
+                int totalFree = 0;
+                while (rs.next()) {
+                    String cat = rs.getString("name");
+                    int count = rs.getInt("available_count");
+                    sb.append(String.format("  %-10s : %2d spots left\n", cat, count));
+                    totalFree += count;
+                }
+                sb.append("-----------------------------------------\n");
+                sb.append("  TOTAL FREE: ").append(totalFree).append(" / 100\n");
+                sb.append("=========================================\n\n");
             }
-        } catch (Exception e) { return "SQL Error: " + e.getMessage(); }
+
+            try (PreparedStatement st = conn.prepareStatement(detailSql);
+                 ResultSet rs = st.executeQuery()) {
+                String currentCategory = "";
+                int countInRow = 0;
+
+                while (rs.next()) {
+                    String category = rs.getString("cat_name");
+                    int spot = rs.getInt("spot_number");
+
+                    if (!category.equals(currentCategory)) {
+                        sb.append("\n> ").append(category.toUpperCase()).append(" SECTION:\n");
+                        currentCategory = category;
+                        countInRow = 0;
+                    }
+
+                    sb.append(String.format("[%03d] ", spot));
+                    countInRow++;
+                    if (countInRow == 10) {
+                        sb.append("\n");
+                        countInRow = 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return "Dashboard error: " + e.getMessage();
+        }
+
         return sb.toString();
     }
 
