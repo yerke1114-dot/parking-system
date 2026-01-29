@@ -11,7 +11,15 @@ public class AuthUser {
         this.role = role;
     }
 
-    public int getUserId() { return UserId; }
-    public String getUsername() { return username; }
-    public String getRole() { return role; }
+    public int getUserId() {
+        return UserId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getRole() {
+        return role;
+    }
 }

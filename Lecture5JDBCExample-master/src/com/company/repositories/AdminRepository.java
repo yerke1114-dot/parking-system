@@ -64,9 +64,15 @@ public class AdminRepository {
 
     private long daysLeft(Timestamp end) {
         if (end == null) return -1;
+
         Instant now = Instant.now();
         Instant endI = end.toInstant();
         long days = Duration.between(now, endI).toDays();
+
+        if (days > 36500) {
+            return 9999;
+        }
+
         return Math.max(days, 0);
     }
 }
