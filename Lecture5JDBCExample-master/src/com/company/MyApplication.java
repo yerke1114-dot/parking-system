@@ -88,22 +88,35 @@ public class MyApplication {
                     buyParkingFlow(user.getUserId());
                     break;
                 case 4:
-                    String activeParking = parkingRepo.getMyParking(user.getUserId());
+                    System.out.println("\n--- Cancel Parking Order ---");
+                    System.out.println(parkingRepo.getMyParking(user.getUserId()));
 
-                    if (activeParking.toLowerCase().contains("no active parking")) {
-                        System.out.println("\n[!] You don't have any active orders to cancel.");
-                    } else {
-                        System.out.println("\n--- Your Active Orders ---");
-                        System.out.println(activeParking);
+                    System.out.print("Enter spot number to cancel: ");
+                    int spotToCancel = scanner.nextInt();
 
-                        System.out.print("Enter the Spot Number you want to CANCEL: ");
-                        int spotToCancel = scanner.nextInt();
+                    System.out.print("Are you sure you want to cancel? A 80% refund will be issued. (y/n): ");
+                    String confirmCancel = scanner.next();
 
-                        System.out.println("Processing cancellation...");
-                        String result = parkingRepo.cancelOrder(user.getUserId(), spotToCancel);
-                        System.out.println(result);
+                    if (confirmCancel.equalsIgnoreCase("y")) {
+                        String cancelResult = parkingRepo.cancelOrder(user.getUserId(), spotToCancel);
+
+                        if (cancelResult.contains("successfully")) {
+                            double refundAmount = 150.0;
+                            boolean refundSuccess = parkingRepo.updateBalance(user.getUserId(), refundAmount);
+
+                            System.out.println("Order Status: " + cancelResult);
+                            if (refundSuccess) {
+                                System.out.printf("Refund Status: $%.2f has been returned to your wallet.\n", refundAmount);
+                                System.out.printf("New Balance: $%.2f\n", parkingRepo.getBalance(user.getUserId()));
+                            } else {
+                                System.out.println("Warning: Order cancelled but refund failed. Please contact support.");
+                            }
+                        } else {
+                            System.out.println("Error: " + cancelResult);
+                        }
                     }
                     break;
+
                 case 5:
                     String myParkingInfo = parkingRepo.getMyParking(user.getUserId());
                     if (myParkingInfo.toLowerCase().contains("no active parking")) {
