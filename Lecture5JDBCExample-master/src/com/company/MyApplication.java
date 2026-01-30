@@ -155,6 +155,36 @@ public class MyApplication {
                         }
                     }
                     break;
+                case 6:
+                    System.out.println("\n" + "=".repeat(30));
+                    System.out.println("       MY DIGITAL WALLET");
+                    System.out.println("=".repeat(30));
+
+                    double currentCash = parkingRepo.getBalance(user.getUserId());
+                    System.out.printf("Current Balance: $%.2f\n", currentCash);
+                    System.out.println("-".repeat(30));
+
+                    System.out.println("1. Top-up Balance");
+                    System.out.println("0. Back to Menu");
+                    System.out.print("Select an option: ");
+
+                    int walletOp = scanner.nextInt();
+                    if (walletOp == 1) {
+                        System.out.print("Enter amount to deposit: $");
+                        double deposit = scanner.nextDouble();
+
+                        if (deposit <= 0) {
+                            System.out.println("Error: Invalid amount!");
+                        } else {
+                            boolean success = parkingRepo.updateBalance(user.getUserId(), deposit);
+                            if (success) {
+                                System.out.printf("Success! New Balance: $%.2f\n", (currentCash + deposit));
+                            } else {
+                                System.out.println("Error: Top-up failed. Database error.");
+                            }
+                        }
+                    }
+                    break;
             }
         }
     }
