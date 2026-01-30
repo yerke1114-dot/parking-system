@@ -17,11 +17,10 @@ public class Main {
 
         AdminRepository adminRepo = new AdminRepository(db);
         IParkingRepository parkingRepo = new ParkingRepository(db);
-        IParkingController parkingController = new ParkingController(parkingRepo);
-
+        ParkingController parkingController = new ParkingController(parkingRepo);
         AuthorizationInterface auth = new AuthorizationRepository(db);
 
-        MyApplication app = new MyApplication(auth, parkingController, adminRepo);
+        MyApplication app = new MyApplication(auth, parkingController);
         app.start();
 
         db.close();
