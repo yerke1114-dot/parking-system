@@ -119,54 +119,38 @@ public class MyApplication {
 
 
                 case 5:
-                    String myParkingInfo = parkingRepo.getMyParking(user.getUserId());
-                    if (myParkingInfo.toLowerCase().contains("no active parking")) {
-                        System.out.println("\n[!] Error: You don't have any active orders to extend.");
-                    } else {
-                        System.out.println("\n--- Your Active Orders ---");
-                        System.out.println(myParkingInfo);
+                    System.out.println("\n--- Extend Parking Order ---");
+                    System.out.println(parkingRepo.getMyParking(user.getUserId()));
 
-                        System.out.print("Enter the Spot Number you want to extend: ");
-                        int spotToExtend = scanner.nextInt();
-                        if (!myParkingInfo.contains("Spot: " + spotToExtend)) {
-                            System.out.println("\n[!] Error: Spot #" + spotToExtend + " is not your car spot!");
-                            System.out.println("[i] Action cancelled. Please enter the correct Spot Number.");
+                    System.out.print("Enter spot number to extend: ");
+                    int spotToExtend = scanner.nextInt();
+                    System.out.print("How many months? (1/3/6): ");
+                    int extraMonths = scanner.nextInt();
+
+                    double finalPrice = 0;
+                    if (extraMonths == 1) finalPrice = 200;
+                    else if (extraMonths == 3) finalPrice = 500;
+                    else if (extraMonths == 6) finalPrice = 900;
+
+                    System.out.println("Total price for " + extraMonths + " months: $" + finalPrice);
+                    System.out.print("Confirm payment? (y/n): ");
+                    String confirm = scanner.next();
+
+                    if (confirm.equalsIgnoreCase("y")) {
+                        double currentBalance = parkingRepo.getBalance(user.getUserId());
+
+                        if (currentBalance < finalPrice) {
+                            System.out.println("❌ Error: Insufficient funds! Your balance: $" + currentBalance);
+                            System.out.println("Please top up your wallet (Option 6).");
                         } else {
-                            System.out.print("How many extra months (1, 3, 6)?: ");
-                            int extraMonths = scanner.nextInt();
-                            scanner.nextLine();
+                            boolean paySuccess = parkingRepo.updateBalance(user.getUserId(), -finalPrice);
 
-                            int pricePerMonth = 200;
-                            int basePrice = extraMonths * pricePerMonth;
-                            int finalPrice;
-                            if (extraMonths >= 6) {
-                                finalPrice = 900;
-                            } else if (extraMonths >= 3) {
-                                finalPrice = 500;
-                            } else {
-                                finalPrice = basePrice;
-                            }
-                            int discount = basePrice - finalPrice;
-
-                            System.out.println("\n================================");
-                            System.out.println("       RENEWAL SUMMARY          ");
-                            System.out.println("  Spot Number:  " + spotToExtend);
-                            System.out.println("  Duration:     " + extraMonths + " Month(s)");
-                            System.out.println("  Standard Rate: $" + basePrice);
-                            System.out.println("  Bundle Discount: -$" + discount);
-                            System.out.println("  ----------------------------  ");
-                            System.out.println("  FINAL PAY:    $" + finalPrice);
-                            System.out.println("================================");
-
-                            System.out.print("Confirm payment and extend? (y/n): ");
-                            String confirm = scanner.next();
-
-                            if (confirm.equalsIgnoreCase("y")) {
-                                System.out.println("\nProcessing extension...");
+                            if (paySuccess) {
                                 String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
-                                System.out.println(result);
+                                System.out.println("✅ " + result);
+                                System.out.println("New Balance: $" + (currentBalance - finalPrice));
                             } else {
-                                System.out.println("\n[INFO] Action cancelled.");
+                                System.out.println("❌ System error during payment. Please try again.");
                             }
                         }
                     }
