@@ -121,14 +121,29 @@ public class MyApplication {
                             System.out.print("How many extra months (1, 3, 6)?: ");
                             int extraMonths = scanner.nextInt();
                             scanner.nextLine();
-                            int pricePerMonth = 50;
-                            int totalCost = extraMonths * pricePerMonth;
+
+                            int pricePerMonth = 200;
+                            int basePrice = extraMonths * pricePerMonth;
+                            int finalPrice;
+                            if (extraMonths >= 6) {
+                                finalPrice = 900;
+                            } else if (extraMonths >= 3) {
+                                finalPrice = 500;
+                            } else {
+                                finalPrice = basePrice;
+                            }
+                            int discount = basePrice - finalPrice;
+
                             System.out.println("\n================================");
                             System.out.println("       RENEWAL SUMMARY          ");
                             System.out.println("  Spot Number:  " + spotToExtend);
                             System.out.println("  Duration:     " + extraMonths + " Month(s)");
-                            System.out.println("  Total Price:  $" + totalCost);
+                            System.out.println("  Standard Rate: $" + basePrice);
+                            System.out.println("  Bundle Discount: -$" + discount);
+                            System.out.println("  ----------------------------  ");
+                            System.out.println("  FINAL PAY:    $" + finalPrice);
                             System.out.println("================================");
+
                             System.out.print("Confirm payment and extend? (y/n): ");
                             String confirm = scanner.next();
 
@@ -137,7 +152,7 @@ public class MyApplication {
                                 String result = parkingRepo.extendOrder(user.getUserId(), spotToExtend, extraMonths);
                                 System.out.println(result);
                             } else {
-                                System.out.println("\n[INFO] Action cancelled. No charges applied.");
+                                System.out.println("\n[INFO] Action cancelled.");
                             }
                         }
                     }

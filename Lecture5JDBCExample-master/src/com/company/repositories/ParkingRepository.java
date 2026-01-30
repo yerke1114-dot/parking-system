@@ -2,8 +2,10 @@ package com.company.repositories;
 
 import com.company.data.interfaces.IDB;
 import com.company.repositories.interfaces.IParkingRepository;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ParkingRepository implements IParkingRepository {
     private final IDB db;
@@ -27,7 +29,9 @@ public class ParkingRepository implements IParkingRepository {
                             .append(" | End: ").append(rs.getTimestamp("end_date")).append("\n");
                 }
             }
-        } catch (Exception e) { return "SQL Error: " + e.getMessage(); }
+        } catch (Exception e) {
+            return "SQL Error: " + e.getMessage();
+        }
         return sb.length() == 0 ? "No active parking." : sb.toString();
     }
 
@@ -49,7 +53,7 @@ public class ParkingRepository implements IParkingRepository {
 
         StringBuilder sb = new StringBuilder();
 
-        try (java.sql.Connection conn = db.getConnection()) {
+        try (Connection conn = db.getConnection()) {
             sb.append("\n=========================================\n");
             sb.append("         🅿️  PARKING DASHBOARD\n");
             sb.append("=========================================\n");
@@ -104,14 +108,21 @@ public class ParkingRepository implements IParkingRepository {
         String sql = "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status, start_date, end_date) " +
                 "VALUES (?, ?, ?, ?, 'ACTIVE', now(), now() + (? || ' months')::interval)";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, userId); st.setInt(2, spotNumber);
-            st.setString(3, phone); st.setString(4, car); st.setInt(5, months);
+            st.setInt(1, userId);
+            st.setInt(2, spotNumber);
+            st.setString(3, phone);
+            st.setString(4, car);
+            st.setInt(5, months);
             return st.executeUpdate() > 0 ? "Purchase successful!" : "Purchase failed!";
-        } catch (Exception e) { return "SQL Error: " + e.getMessage(); }
+        } catch (Exception e) {
+            return "SQL Error: " + e.getMessage();
+        }
     }
+
     private boolean isPhoneValid(String phone) {
         return phone != null && phone.length() == 11;
     }
+
     private boolean isCarNumberValid(String car) {
         return car != null && car.length() == 8;
     }
@@ -124,7 +135,9 @@ public class ParkingRepository implements IParkingRepository {
             st.setInt(2, spotNumber);
             int rows = st.executeUpdate();
             return rows > 0 ? "Order released successfully!" : "No active order found.";
-        } catch (Exception e) { return "DB error: " + e.getMessage(); }
+        } catch (Exception e) {
+            return "DB error: " + e.getMessage();
+        }
     }
 
     @Override
@@ -133,8 +146,38 @@ public class ParkingRepository implements IParkingRepository {
         String sql = "UPDATE parking_orders SET end_date = end_date + (? || ' months')::interval " +
                 "WHERE \"User_ID\" = ? AND spot_number = ? AND status = 'ACTIVE'";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, extraMonths); st.setInt(2, userId); st.setInt(3, spotNumber);
+            st.setInt(1, extraMonths);
+            st.setInt(2, userId);
+            st.setInt(3, spotNumber);
             return st.executeUpdate() > 0 ? "Extension successful!" : "Failed to extend.";
-        } catch (Exception e) { return "DB error: " + e.getMessage(); }
+        } catch (Exception e) {
+            return "DB error: " + e.getMessage();
+        }
+    }
+    public double getBalance(int userId) {
+        double balance = 0;
+        String sql = "SELECT balance FROM users WHERE user_id = ?";
+        try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    balance = rs.getDouble("balance");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Balance Error: " + e.getMessage());
+        }
+        return balance;
+    }
+    public boolean updateBalance(int userId, double amount) {
+        String sql = "UPDATE users SET balance = balance + ? WHERE user_id = ?";
+        try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
+            pstmt.setDouble(1, amount);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.err.println("Update Balance Error: " + e.getMessage());
+            return false;
+        }
     }
 }

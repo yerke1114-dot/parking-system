@@ -6,5 +6,7 @@ public interface IParkingRepository {
     String buyParking(int userId, int spotNumber, String ownerPhone, String carNumber, int months);
     String cancelOrder(int userId, int spotNumber);
     String extendOrder(int userId, int spotNumber, int extraMonths);
+    double getBalance(int userId);
+    boolean updateBalance(int userId, double amount);
 }
 
