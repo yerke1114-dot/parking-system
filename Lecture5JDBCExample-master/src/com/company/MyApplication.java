@@ -117,6 +117,7 @@ public class MyApplication {
                     }
                     break;
 
+
                 case 5:
                     String myParkingInfo = parkingRepo.getMyParking(user.getUserId());
                     if (myParkingInfo.toLowerCase().contains("no active parking")) {
