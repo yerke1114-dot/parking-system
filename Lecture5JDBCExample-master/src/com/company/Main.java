@@ -1,6 +1,8 @@
 package com.company;
 
+import com.company.controllers.ParkingController;
 import com.company.controllers.interfaces.AuthorizationInterface;
+import com.company.controllers.interfaces.IParkingController;
 import com.company.data.PostgresDB;
 import com.company.data.interfaces.IDB;
 import com.company.repositories.AdminRepository;
@@ -15,9 +17,11 @@ public class Main {
 
         AdminRepository adminRepo = new AdminRepository(db);
         IParkingRepository parkingRepo = new ParkingRepository(db);
+        IParkingController parkingController = new ParkingController(parkingRepo);
+
         AuthorizationInterface auth = new AuthorizationRepository(db);
 
-        MyApplication app = new MyApplication(auth, parkingRepo, adminRepo);
+        MyApplication app = new MyApplication(auth, parkingController, adminRepo);
         app.start();
 
         db.close();
