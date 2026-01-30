@@ -6,8 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Lecture5JDBCExample" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Lecture5JDBCExample" target="21" />
+    </bytecodeTargetLevel>
   </component>
 </project>

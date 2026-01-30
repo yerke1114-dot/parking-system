@@ -35,8 +35,6 @@ public class MyApplication {
         }
     }
 
-    // ================= AUTH =================
-
     private AuthUser authMenu() {
         while (true) {
             ParkingUI.printHeader("AUTHENTICATION GATEWAY");
@@ -59,21 +57,18 @@ public class MyApplication {
                     : auth.register(username, password);
 
             if (user != null) {
-                System.out.println("\n✅ Access Granted. Welcome, " + user.getUsername() + "!");
+                System.out.println("\n Access Granted. Welcome, " + user.getUsername() + "!");
                 return user;
             }
 
-            System.out.println("❌ Invalid credentials or username taken.");
+            System.out.println("Invalid credentials or username taken.");
         }
     }
-
-    // ================= USER MENU =================
 
     private void userMenu(AuthUser user) {
         while (true) {
             ParkingUI.printHeader("RESIDENT DASHBOARD | ID: " + user.getUserId());
 
-            // Меню через лямбды (Runnable)
             Map<Integer, Runnable> actions = new LinkedHashMap<>();
             actions.put(1, () -> System.out.println(controller.getMyParking(user.getUserId())));
             actions.put(2, () -> System.out.println(controller.getFreeParking()));
@@ -93,7 +88,7 @@ public class MyApplication {
 
             int option = ParkingUI.readInt("Action");
             if (option == 0) {
-                System.out.println("👋 Logged out.\n");
+                System.out.println("Logged out.\n");
                 return;
             }
 
@@ -122,7 +117,7 @@ public class MyApplication {
 
         int price = ParkingUI.calculatePrice(months);
         if (price == 0) {
-            System.out.println("❌ Plan must be 0, 1, 3 or 6.");
+            System.out.println("Plan must be 0, 1, 3 or 6.");
             return;
         }
 
@@ -137,12 +132,12 @@ public class MyApplication {
         }
 
         if (bal < price) {
-            System.out.println("❌ Not enough balance.");
+            System.out.println("Not enough balance.");
             return;
         }
 
         if (!controller.updateBalance(userId, -price)) {
-            System.out.println("❌ Payment error (balance not updated).");
+            System.out.println("Payment error (balance not updated).");
             return;
         }
 
@@ -161,7 +156,6 @@ public class MyApplication {
             return;
         }
 
-        // Если у тебя в проекте реально есть возврат денег — можешь добавить тут логику refund
         System.out.println(controller.cancelOrder(userId, spot));
     }
 
@@ -179,7 +173,7 @@ public class MyApplication {
 
         int price = ParkingUI.calculatePrice(extraMonths);
         if (price == 0 || extraMonths == 0) {
-            System.out.println("❌ Extension months must be 1, 3 or 6.");
+            System.out.println("Extension months must be 1, 3 or 6.");
             return;
         }
 
@@ -194,12 +188,12 @@ public class MyApplication {
         }
 
         if (bal < price) {
-            System.out.println("❌ Not enough balance.");
+            System.out.println("Not enough balance.");
             return;
         }
 
         if (!controller.updateBalance(userId, -price)) {
-            System.out.println("❌ Payment error (balance not updated).");
+            System.out.println("Payment error (balance not updated).");
             return;
         }
 
@@ -225,30 +219,28 @@ public class MyApplication {
         try {
             amount = Double.parseDouble(ParkingUI.readString("Amount"));
         } catch (NumberFormatException e) {
-            System.out.println("❌ Amount must be number.");
+            System.out.println("Amount must be number.");
             return;
         }
 
         if (amount <= 0) {
-            System.out.println("❌ Amount must be > 0.");
+            System.out.println("Amount must be > 0.");
             return;
         }
         boolean ok = controller.updateBalance(userId, amount);
         if (!ok) {
-            System.out.println("❌ Top up failed.");
+            System.out.println("Top up failed.");
             return;
         }
 
-        System.out.println("✅ New balance: " + controller.getBalance(userId) + "$");
+        System.out.println("New balance: " + controller.getBalance(userId) + "$");
     }
-
-    // ================= ADMIN MENU =================
 
     private void adminMenu(AuthUser admin) {
         while (true) {
             ParkingUI.printHeader("ADMIN CONTROL PANEL | " + admin.getUsername());
             Map<Integer, Runnable> actions = new LinkedHashMap<>();
-            actions.put(1, controller::showAllParkingStatus); // ЛЯМБДА/Method reference
+            actions.put(1, controller::showAllParkingStatus);
             actions.put(0, () -> { /* logout */ });
 
             System.out.println(" [1] Show all parking zones (owner + end date)");
@@ -256,7 +248,7 @@ public class MyApplication {
 
             int choice = ParkingUI.readInt("Execute");
             if (choice == 0) {
-                System.out.println("👋 Admin logged out.\n");
+                System.out.println("Admin logged out.\n");
                 return;
             }
 
