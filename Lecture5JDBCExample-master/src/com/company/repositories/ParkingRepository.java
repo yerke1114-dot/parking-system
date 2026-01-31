@@ -154,9 +154,11 @@ public class ParkingRepository implements IParkingRepository {
             return "DB error: " + e.getMessage();
         }
     }
+    @Override
     public double getBalance(int userId) {
         double balance = 0;
-        String sql = "SELECT balance FROM users WHERE user_id = ?";
+        // 修改点：将 user_id 改为 \"User_ID\"
+        String sql = "SELECT balance FROM users WHERE \"User_ID\" = ?";
         try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -169,8 +171,9 @@ public class ParkingRepository implements IParkingRepository {
         }
         return balance;
     }
+    @Override
     public boolean updateBalance(int userId, double amount) {
-        String sql = "UPDATE users SET balance = balance + ? WHERE user_id = ?";
+        String sql = "UPDATE users SET balance = balance + ? WHERE \"User_ID\" = ?";
         try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
             pstmt.setDouble(1, amount);
             pstmt.setInt(2, userId);
@@ -179,5 +182,9 @@ public class ParkingRepository implements IParkingRepository {
             System.err.println("Update Balance Error: " + e.getMessage());
             return false;
         }
+    }
+    @Override
+    public void showAllParkingStatus() {
+
     }
 }

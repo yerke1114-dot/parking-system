@@ -5,7 +5,6 @@ import com.company.repositories.interfaces.IParkingRepository;
 public class ParkingController {
 
     private final IParkingRepository repo;
-
     public ParkingController(IParkingRepository repo) {
         this.repo = repo;
     }

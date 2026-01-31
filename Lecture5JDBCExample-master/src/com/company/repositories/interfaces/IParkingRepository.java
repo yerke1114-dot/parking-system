@@ -8,5 +8,7 @@ public interface IParkingRepository {
     String extendOrder(int userId, int spotNumber, int extraMonths);
     double getBalance(int userId);
     boolean updateBalance(int userId, double amount);
+
+    void showAllParkingStatus();
 }
 
