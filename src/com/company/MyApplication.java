@@ -1,7 +1,7 @@
 package com.company;
 
 import com.company.controllers.ParkingController;
-import com.company.controllers.interfaces.AuthorizationInterface;
+import com.company.repositories.interfaces.AuthorizationInterface;
 import com.company.models.AuthUser;
 
 import java.util.LinkedHashMap;

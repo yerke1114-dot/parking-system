@@ -1,4 +1,4 @@
-package com.company.controllers.interfaces;
+package com.company.repositories.interfaces;
 
 import com.company.models.AuthUser;
 

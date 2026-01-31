@@ -1,8 +1,7 @@
 package com.company;
 
 import com.company.controllers.ParkingController;
-import com.company.controllers.interfaces.AuthorizationInterface;
-import com.company.controllers.interfaces.IParkingController;
+import com.company.repositories.interfaces.AuthorizationInterface;
 import com.company.data.PostgresDB;
 import com.company.data.interfaces.IDB;
 import com.company.repositories.AdminRepository;
