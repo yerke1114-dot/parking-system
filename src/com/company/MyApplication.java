@@ -161,19 +161,30 @@ public class MyApplication {
 
     private void extendFlow(int userId) {
         ParkingUI.printHeader("EXTEND ORDER");
-        System.out.println(controller.getMyParking(userId));
+
+        String myOrders = controller.getMyParking(userId);
+        System.out.println(myOrders);
+
+        if (myOrders.contains("No active parking.")) {
+            return;
+        }
 
         int spot = ParkingUI.readInt("Spot number to extend");
+        if (!myOrders.contains("Spot: " + spot)) {
+            System.out.println("Error: Spot #" + spot + " is not your active parking!");
+            return;
+        }
 
         System.out.println("\nExtend plan:");
         System.out.println(" [1] +1 month (200$)");
         System.out.println(" [3] +3 months (550$)");
         System.out.println(" [6] +6 months (1000$)");
-        int extraMonths = ParkingUI.readInt("Months");
 
+        int extraMonths = ParkingUI.readInt("Months");
         int price = ParkingUI.calculatePrice(extraMonths);
+
         if (price == 0 || extraMonths == 0) {
-            System.out.println("Extension months must be 1, 3 or 6.");
+            System.out.println("Invalid plan.");
             return;
         }
 
@@ -181,23 +192,23 @@ public class MyApplication {
         System.out.println("Your balance: " + bal + "$");
         System.out.println("Price: " + price + "$");
 
+        if (bal < price) {
+            System.out.println("Not enough balance!");
+            return;
+        }
+
         String confirm = ParkingUI.readString("Confirm payment? (y/n)");
         if (!"y".equalsIgnoreCase(confirm)) {
             System.out.println("Cancelled.");
             return;
         }
 
-        if (bal < price) {
-            System.out.println("Not enough balance.");
-            return;
+        if (controller.updateBalance(userId, -price)) {
+            String res = controller.extendOrder(userId, spot, extraMonths);
+            System.out.println(res);
+        } else {
+            System.out.println("Payment failed.");
         }
-
-        if (!controller.updateBalance(userId, -price)) {
-            System.out.println("Payment error (balance not updated).");
-            return;
-        }
-
-        System.out.println(controller.extendOrder(userId, spot, extraMonths));
     }
 
     private void walletFlow(int userId) {
@@ -239,7 +250,7 @@ public class MyApplication {
     private void adminMenu(AuthUser admin) {
         while (true) {
             ParkingUI.printHeader("ADMIN CONTROL PANEL | " + admin.getUsername());
-            Map<Integer, Runnable> actions = new LinkedHashMap<>();
+            java.util.Map<Integer, Runnable> actions = new java.util.LinkedHashMap<>();
             actions.put(1, controller::showAllParkingStatus);
             actions.put(0, () -> { /* logout */ });
 

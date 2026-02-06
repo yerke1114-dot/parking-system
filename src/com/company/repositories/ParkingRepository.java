@@ -1,13 +1,10 @@
 package com.company.repositories;
 
-import com.company.data.interfaces.IDB;
-import com.company.repositories.interfaces.IParkingRepository;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import com.company.data.interfaces.IDB; import com.company.models.Category; import com.company.repositories.interfaces.IParkingRepository;
 
-public class ParkingRepository implements IParkingRepository {
-    private final IDB db;
+import java.sql.Connection; import java.sql.PreparedStatement; import java.sql.ResultSet;
+
+public class ParkingRepository implements IParkingRepository { private final IDB db;
 
     public ParkingRepository(IDB db) {
         this.db = db;
@@ -44,7 +41,7 @@ public class ParkingRepository implements IParkingRepository {
                         "GROUP BY c.name";
 
         String detailSql =
-                "SELECT ps.spot_number, ps.\"Price\", c.name AS cat_name " +
+                "SELECT ps.spot_number, ps.\"Price\", c.name AS cat_name, c.multiplier " +
                         "FROM parking_spots ps " +
                         "JOIN categories c ON ps.category_id = c.id " +
                         "WHERE ps.spot_number NOT IN (SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') " +
@@ -77,21 +74,53 @@ public class ParkingRepository implements IParkingRepository {
                 int countInRow = 0;
 
                 while (rs.next()) {
-                    String category = rs.getString("cat_name");
+                    String catName = rs.getString("cat_name");
+                    double basePrice = rs.getDouble("Price");
+                    double mult = 1.0;
+                    try {
+                        mult = rs.getDouble("multiplier");
+                    } catch (Exception e) {}
+
                     int spot = rs.getInt("spot_number");
+                    double finalPrice = basePrice * mult;
 
-                    if (!category.equals(currentCategory)) {
-                        sb.append("\n> ").append(category.toUpperCase()).append(" SECTION:\n");
-                        currentCategory = category;
+                    if (!catName.equals(currentCategory)) {
+                        if (!currentCategory.isEmpty()) {
+                            if (countInRow > 0) {
+                                while (countInRow < 7) {
+                                    sb.append("│      ");
+                                    countInRow++;
+                                }
+                                sb.append("│\n");
+                            }
+                            sb.append("└─────────────────────────────────────────────────────────┘\n");
+                        }
+                        sb.append("\n┌─────────────────────────────────────────────────────────┐\n");
+                        sb.append(String.format("│ %-15s | Base: %-7.1f$ | Rate: x%-5.1f │\n",
+                                catName.toUpperCase(), basePrice, mult));
+                        sb.append("├─────────────────────────────────────────────────────────┤\n");
+                        currentCategory = catName;
                         countInRow = 0;
                     }
 
-                    sb.append(String.format("[%03d] ", spot));
+                    sb.append(String.format("│ #%03d ", spot));
                     countInRow++;
-                    if (countInRow == 10) {
-                        sb.append("\n");
+
+                    if (countInRow == 7) {
+                        sb.append("│\n");
                         countInRow = 0;
                     }
+                }
+
+                if (countInRow > 0) {
+                    while (countInRow < 7) {
+                        sb.append("│      ");
+                        countInRow++;
+                    }
+                    sb.append("│\n");
+                }
+                if (!currentCategory.isEmpty()) {
+                    sb.append("└─────────────────────────────────────────────────────────┘\n");
                 }
             }
         } catch (Exception e) {
@@ -116,14 +145,6 @@ public class ParkingRepository implements IParkingRepository {
         } catch (Exception e) {
             return "SQL Error: " + e.getMessage();
         }
-    }
-
-    private boolean isPhoneValid(String phone) {
-        return phone != null && phone.length() == 11;
-    }
-
-    private boolean isCarNumberValid(String car) {
-        return car != null && car.length() == 8;
     }
 
     @Override
@@ -153,10 +174,10 @@ public class ParkingRepository implements IParkingRepository {
             return "DB error: " + e.getMessage();
         }
     }
+
     @Override
     public double getBalance(int userId) {
         double balance = 0;
-        // 修改点：将 user_id 改为 \"User_ID\"
         String sql = "SELECT balance FROM users WHERE \"User_ID\" = ?";
         try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
             pstmt.setInt(1, userId);
@@ -170,6 +191,7 @@ public class ParkingRepository implements IParkingRepository {
         }
         return balance;
     }
+
     @Override
     public boolean updateBalance(int userId, double amount) {
         String sql = "UPDATE users SET balance = balance + ? WHERE \"User_ID\" = ?";
@@ -182,8 +204,16 @@ public class ParkingRepository implements IParkingRepository {
             return false;
         }
     }
+
     @Override
     public void showAllParkingStatus() {
+    }
 
+    private boolean isPhoneValid(String phone) {
+        return phone != null && phone.length() >= 10;
+    }
+
+    private boolean isCarNumberValid(String car) {
+        return car != null && car.length() == 8;
     }
 }

@@ -1,3 +1,5 @@
+package com.company.models;
+
 public class Category {
     private String name;
     private double multiplier;
