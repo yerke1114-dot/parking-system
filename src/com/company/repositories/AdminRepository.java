@@ -47,14 +47,24 @@ public class AdminRepository {
                     System.out.println("Spot " + spot + " | Price: " + price + "$ | FREE");
                 } else {
                     long daysLeft = daysLeft(end);
-                    System.out.println(
-                            "Spot " + spot +
-                                    " | Price: " + price + "$" +
-                                    " | User: " + username +
-                                    " | Status: " + status +
-                                    " | Ends: " + end +
-                                    " | Days left: " + daysLeft
-                    );
+
+                    if (daysLeft == 9999) {
+                        System.out.println(
+                                "Spot " + spot +
+                                        " | Price: " + price + "$" +
+                                        " | User: " + username +
+                                        " | Status: FOREVER"
+                        );
+                    } else {
+                        System.out.println(
+                                "Spot " + spot +
+                                        " | Price: " + price + "$" +
+                                        " | User: " + username +
+                                        " | Status: " + status +
+                                        " | Ends: " + end +
+                                        " | Days left: " + daysLeft
+                        );
+                    }
                 }
             }
         } catch (Exception e) {
