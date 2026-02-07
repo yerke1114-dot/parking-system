@@ -1,5 +1,6 @@
 package com.company;
 
+import com.company.controllers.AdminController;
 import com.company.controllers.ParkingController;
 import com.company.repositories.interfaces.AuthorizationInterface;
 import com.company.models.AuthUser;
@@ -11,10 +12,14 @@ public class MyApplication {
 
     private final AuthorizationInterface auth;
     private final ParkingController controller;
+    private final AdminController adminController;
 
-    public MyApplication(AuthorizationInterface auth, ParkingController controller) {
+    public MyApplication(AuthorizationInterface auth,
+                         ParkingController controller,
+                         AdminController adminController) {
         this.auth = auth;
         this.controller = controller;
+        this.adminController = adminController;
     }
 
     public void start() {
@@ -108,6 +113,7 @@ public class MyApplication {
         int spot = ParkingUI.readInt("Spot number");
         String phone = ParkingUI.readString("Owner phone (11 digits)");
         String car = ParkingUI.readString("Car number (8 chars)");
+
         System.out.println("\nChoose plan:");
         System.out.println(" [0] Forever (5000$)");
         System.out.println(" [1] 1 month (200$)");
@@ -238,6 +244,7 @@ public class MyApplication {
             System.out.println("Amount must be > 0.");
             return;
         }
+
         boolean ok = controller.updateBalance(userId, amount);
         if (!ok) {
             System.out.println("Top up failed.");
@@ -250,8 +257,9 @@ public class MyApplication {
     private void adminMenu(AuthUser admin) {
         while (true) {
             ParkingUI.printHeader("ADMIN CONTROL PANEL | " + admin.getUsername());
-            java.util.Map<Integer, Runnable> actions = new java.util.LinkedHashMap<>();
-            actions.put(1, controller::showAllParkingStatus);
+
+            Map<Integer, Runnable> actions = new LinkedHashMap<>();
+            actions.put(1, adminController::showAllParkingStatus);
             actions.put(0, () -> { /* logout */ });
 
             System.out.println(" [1] Show all parking zones (owner + end date)");

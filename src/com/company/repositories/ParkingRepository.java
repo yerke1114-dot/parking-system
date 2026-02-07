@@ -134,7 +134,6 @@ public class ParkingRepository implements IParkingRepository { private final IDB
     public String buyParking(int userId, int spotNumber, String phone, String car, int months) {
         if (!isPhoneValid(phone) || !isCarNumberValid(car)) return "Input validation failed!";
 
-        // 修复逻辑：如果是 0 个月（Forever），我们按 1200 个月（100年）来计算截止日期
         int intervalMonths = (months == 0) ? 1200 : months;
 
         String sql = "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status, start_date, end_date) " +
@@ -145,7 +144,7 @@ public class ParkingRepository implements IParkingRepository { private final IDB
             st.setInt(2, spotNumber);
             st.setString(3, phone);
             st.setString(4, car);
-            st.setInt(5, intervalMonths); // 使用处理过的月份
+            st.setInt(5, intervalMonths);
 
             return st.executeUpdate() > 0 ? "Purchase successful!" : "Purchase failed!";
         } catch (Exception e) {
