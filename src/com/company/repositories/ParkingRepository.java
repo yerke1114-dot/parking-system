@@ -1,10 +1,11 @@
 package com.company.repositories;
 
-import com.company.data.interfaces.IDB; import com.company.models.Category; import com.company.repositories.interfaces.IParkingRepository;
+import com.company.data.interfaces.IDB;
+import com.company.repositories.interfaces.IParkingRepository;
+import java.sql.*;
 
-import java.sql.Connection; import java.sql.PreparedStatement; import java.sql.ResultSet;
-
-public class ParkingRepository implements IParkingRepository { private final IDB db;
+public class ParkingRepository implements IParkingRepository {
+    private final IDB db;
 
     public ParkingRepository(IDB db) {
         this.db = db;
@@ -12,61 +13,43 @@ public class ParkingRepository implements IParkingRepository { private final IDB
 
     @Override
     public String getMyParking(int userId) {
-        String sql = "SELECT id, spot_number, owner_phone, car_number, status, end_date " +
-                "FROM parking_orders WHERE \"User_ID\" = ? AND status = 'ACTIVE' ORDER BY id";
+        String sql = "SELECT spot_number, car_number FROM parking_orders WHERE \"User_ID\" = ? AND status = 'ACTIVE'";
         StringBuilder sb = new StringBuilder();
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
             st.setInt(1, userId);
-            try (ResultSet rs = st.executeQuery()) {
-                while (rs.next()) {
-                    sb.append("Order #").append(rs.getInt("id"))
-                            .append(" | Spot: ").append(rs.getInt("spot_number"))
-                            .append(" | Car: ").append(rs.getString("car_number"))
-                            .append(" | End: ").append(rs.getTimestamp("end_date")).append("\n");
-                }
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                sb.append("Spot: ").append(rs.getInt("spot_number")).append(" | Car: ").append(rs.getString("car_number")).append("\n");
             }
-        } catch (Exception e) {
-            return "SQL Error: " + e.getMessage();
-        }
-        return sb.length() == 0 ? "No active parking." : sb.toString();
+        } catch (Exception e) { return e.getMessage(); }
+        return sb.length() == 0 ? "None" : sb.toString();
     }
 
     @Override
     public String getFreeParking() {
-        String statsSql =
-                "SELECT c.name, COUNT(ps.spot_number) as available_count " +
-                        "FROM parking_spots ps " +
-                        "JOIN categories c ON ps.category_id = c.id " +
-                        "WHERE ps.spot_number NOT IN (SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') " +
-                        "GROUP BY c.name";
 
-        String detailSql =
-                "SELECT ps.spot_number, ps.\"Price\", c.name AS cat_name, c.multiplier " +
-                        "FROM parking_spots ps " +
-                        "JOIN categories c ON ps.category_id = c.id " +
-                        "WHERE ps.spot_number NOT IN (SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') " +
-                        "ORDER BY c.name, ps.spot_number";
+        String statsSql = "SELECT c.name, COUNT(ps.spot_number) as available_count FROM parking_spots ps " +
+                "JOIN categories c ON ps.category_id = c.id WHERE ps.spot_number NOT IN " +
+                "(SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') GROUP BY c.name";
+
+        String detailSql = "SELECT ps.spot_number, ps.\"Price\", c.name AS cat_name, c.multiplier FROM parking_spots ps " +
+                "JOIN categories c ON ps.category_id = c.id WHERE ps.spot_number NOT IN " +
+                "(SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') ORDER BY c.name, ps.spot_number";
 
         StringBuilder sb = new StringBuilder();
-
         try (Connection conn = db.getConnection()) {
-            sb.append("\n=========================================\n");
-            sb.append("         🅿️  PARKING DASHBOARD\n");
-            sb.append("=========================================\n");
+            sb.append("\n===============================================================\n");
+            sb.append("                 🅿️  PARKING AVAILABILITY SYSTEM\n");
+            sb.append("===============================================================\n");
 
             try (PreparedStatement st = conn.prepareStatement(statsSql);
                  ResultSet rs = st.executeQuery()) {
-                int totalFree = 0;
                 while (rs.next()) {
-                    String cat = rs.getString("name");
-                    int count = rs.getInt("available_count");
-                    sb.append(String.format("  %-10s : %2d spots left\n", cat, count));
-                    totalFree += count;
+                    sb.append(String.format("  %-12s : %2d spots available\n",
+                            rs.getString("name").toUpperCase(), rs.getInt("available_count")));
                 }
-                sb.append("-----------------------------------------\n");
-                sb.append("  TOTAL FREE: ").append(totalFree).append(" / 100\n");
-                sb.append("=========================================\n\n");
             }
+            sb.append("---------------------------------------------------------------\n");
 
             try (PreparedStatement st = conn.prepareStatement(detailSql);
                  ResultSet rs = st.executeQuery()) {
@@ -75,150 +58,95 @@ public class ParkingRepository implements IParkingRepository { private final IDB
 
                 while (rs.next()) {
                     String catName = rs.getString("cat_name");
-                    double basePrice = rs.getDouble("Price");
-                    double mult = 1.0;
-                    try {
-                        mult = rs.getDouble("multiplier");
-                    } catch (Exception e) {}
-
+                    double finalPrice = rs.getDouble("Price") * rs.getDouble("multiplier");
                     int spot = rs.getInt("spot_number");
-                    double finalPrice = basePrice * mult;
 
                     if (!catName.equals(currentCategory)) {
                         if (!currentCategory.isEmpty()) {
-                            if (countInRow > 0) {
-                                while (countInRow < 7) {
-                                    sb.append("│      ");
-                                    countInRow++;
-                                }
-                                sb.append("│\n");
-                            }
-                            sb.append("└─────────────────────────────────────────────────────────┘\n");
+
+                            while (countInRow < 5) { sb.append("│           "); countInRow++; }
+                            sb.append("│\n└─────────────────────────────────────────────────────────────┘\n");
                         }
-                        sb.append("\n┌─────────────────────────────────────────────────────────┐\n");
-                        sb.append(String.format("│ %-15s | Base: %-7.1f$ | Rate: x%-5.1f │\n",
-                                catName.toUpperCase(), basePrice, mult));
-                        sb.append("├─────────────────────────────────────────────────────────┤\n");
+                        sb.append(String.format("\n>>> %-15s [ PRICE: %.0f$ ]\n", catName.toUpperCase(), finalPrice));
+                        sb.append("┌─────────────────────────────────────────────────────────────┐\n");
                         currentCategory = catName;
                         countInRow = 0;
                     }
 
-                    sb.append(String.format("│ #%03d ", spot));
+                    sb.append(String.format("│ #%03d:%4.0f$ ", spot, finalPrice));
                     countInRow++;
 
-                    if (countInRow == 7) {
+                    if (countInRow == 5) {
                         sb.append("│\n");
                         countInRow = 0;
                     }
                 }
 
-                if (countInRow > 0) {
-                    while (countInRow < 7) {
-                        sb.append("│      ");
-                        countInRow++;
-                    }
-                    sb.append("│\n");
-                }
                 if (!currentCategory.isEmpty()) {
-                    sb.append("└─────────────────────────────────────────────────────────┘\n");
+                    while (countInRow > 0 && countInRow < 5) { sb.append("│           "); countInRow++; }
+                    if (countInRow != 0) sb.append("│\n");
+                    sb.append("└─────────────────────────────────────────────────────────────┘\n");
                 }
             }
         } catch (Exception e) {
             return "Dashboard error: " + e.getMessage();
         }
-
         return sb.toString();
     }
 
     @Override
-    public String buyParking(int userId, int spotNumber, String phone, String car, int months) {
-        if (!isPhoneValid(phone) || !isCarNumberValid(car)) return "Input validation failed!";
-
-        int intervalMonths = (months == 0) ? 1200 : months;
-
+    public String buyParking(int userId, int spot, String phone, String car, int months) {
+        int m = (months == 0) ? 1200 : months;
         String sql = "INSERT INTO parking_orders(\"User_ID\", spot_number, owner_phone, car_number, status, start_date, end_date) " +
                 "VALUES (?, ?, ?, ?, 'ACTIVE', now(), now() + (? || ' months')::interval)";
-
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, userId);
-            st.setInt(2, spotNumber);
-            st.setString(3, phone);
-            st.setString(4, car);
-            st.setInt(5, intervalMonths);
-
-            return st.executeUpdate() > 0 ? "Purchase successful!" : "Purchase failed!";
-        } catch (Exception e) {
-            return "SQL Error: " + e.getMessage();
-        }
+            st.setInt(1, userId); st.setInt(2, spot); st.setString(3, phone);
+            st.setString(4, car); st.setInt(5, m);
+            return st.executeUpdate() > 0 ? "Success" : "Fail";
+        } catch (Exception e) { return e.getMessage(); }
     }
 
     @Override
-    public String cancelOrder(int userId, int spotNumber) {
-        String sql = "DELETE FROM parking_orders WHERE \"User_ID\" = ? AND spot_number = ? AND status = 'ACTIVE'";
+    public String cancelOrder(int userId, int spot) {
+        String sql = "DELETE FROM parking_orders WHERE \"User_ID\" = ? AND spot_number = ?";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, userId);
-            st.setInt(2, spotNumber);
-            int rows = st.executeUpdate();
-            return rows > 0 ? "Order released successfully!" : "No active order found.";
-        } catch (Exception e) {
-            return "DB error: " + e.getMessage();
-        }
+            st.setInt(1, userId); st.setInt(2, spot);
+            return st.executeUpdate() > 0 ? "Done" : "Not found";
+        } catch (Exception e) { return e.getMessage(); }
     }
 
     @Override
-    public String extendOrder(int userId, int spotNumber, int extraMonths) {
-        if (extraMonths <= 0) return "Months must be positive!";
-        String sql = "UPDATE parking_orders SET end_date = end_date + (? || ' months')::interval " +
-                "WHERE \"User_ID\" = ? AND spot_number = ? AND status = 'ACTIVE'";
+    public String extendOrder(int userId, int spot, int months) {
+        String sql = "UPDATE parking_orders SET end_date = end_date + (? || ' months')::interval WHERE \"User_ID\" = ? AND spot_number = ?";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, extraMonths);
-            st.setInt(2, userId);
-            st.setInt(3, spotNumber);
-            return st.executeUpdate() > 0 ? "Extension successful!" : "Failed to extend.";
-        } catch (Exception e) {
-            return "DB error: " + e.getMessage();
-        }
+            st.setInt(1, months); st.setInt(2, userId); st.setInt(3, spot);
+            return st.executeUpdate() > 0 ? "Extended" : "Fail";
+        } catch (Exception e) { return e.getMessage(); }
     }
 
     @Override
     public double getBalance(int userId) {
-        double balance = 0;
-        String sql = "SELECT balance FROM users WHERE \"User_ID\" = ?";
-        try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
-            pstmt.setInt(1, userId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    balance = rs.getDouble("balance");
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Balance Error: " + e.getMessage());
-        }
-        return balance;
+        try (PreparedStatement st = db.getConnection().prepareStatement("SELECT balance FROM users WHERE \"User_ID\" = ?")) {
+            st.setInt(1, userId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) return rs.getDouble("balance");
+        } catch (Exception e) {}
+        return 0;
     }
 
     @Override
     public boolean updateBalance(int userId, double amount) {
-        String sql = "UPDATE users SET balance = balance + ? WHERE \"User_ID\" = ?";
-        try (PreparedStatement pstmt = db.getConnection().prepareStatement(sql)) {
-            pstmt.setDouble(1, amount);
-            pstmt.setInt(2, userId);
-            return pstmt.executeUpdate() > 0;
-        } catch (Exception e) {
-            System.err.println("Update Balance Error: " + e.getMessage());
-            return false;
-        }
+        try (PreparedStatement st = db.getConnection().prepareStatement("UPDATE users SET balance = balance + ? WHERE \"User_ID\" = ?")) {
+            st.setDouble(1, amount); st.setInt(2, userId);
+            return st.executeUpdate() > 0;
+        } catch (Exception e) { return false; }
     }
 
     @Override
     public void showAllParkingStatus() {
-    }
-
-    private boolean isPhoneValid(String phone) {
-        return phone != null && phone.length() >= 10;
-    }
-
-    private boolean isCarNumberValid(String car) {
-        return car != null && car.length() == 8;
+        try (Statement st = db.getConnection().createStatement()) {
+            ResultSet rs = st.executeQuery("SELECT spot_number FROM parking_spots");
+            while (rs.next()) { System.out.println("Spot: " + rs.getInt(1)); }
+        } catch (Exception e) {}
     }
 }
