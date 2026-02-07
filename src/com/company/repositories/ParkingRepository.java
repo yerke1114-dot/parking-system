@@ -3,6 +3,9 @@ package com.company.repositories;
 import com.company.data.interfaces.IDB;
 import com.company.repositories.interfaces.IParkingRepository;
 import java.sql.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.sql.Timestamp;
 
 public class ParkingRepository implements IParkingRepository {
     private final IDB db;
@@ -13,17 +16,31 @@ public class ParkingRepository implements IParkingRepository {
 
     @Override
     public String getMyParking(int userId) {
-        String sql = "SELECT spot_number, car_number FROM parking_orders WHERE \"User_ID\" = ? AND status = 'ACTIVE'";
+        String sql = "SELECT spot_number, car_number, end_date " +
+                "FROM parking_orders WHERE \"User_ID\" = ? AND status = 'ACTIVE'";
+
         StringBuilder sb = new StringBuilder();
+
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
             st.setInt(1, userId);
             ResultSet rs = st.executeQuery();
+
             while (rs.next()) {
-                sb.append("Spot: ").append(rs.getInt("spot_number")).append(" | Car: ").append(rs.getString("car_number")).append("\n");
+                Timestamp end = rs.getTimestamp("end_date");
+                String endLabel = isForever(end) ? "Forever" : String.valueOf(end);
+
+                sb.append("Spot: ").append(rs.getInt("spot_number"))
+                        .append(" | Car: ").append(rs.getString("car_number"))
+                        .append(" | End: ").append(endLabel)
+                        .append("\n");
             }
-        } catch (Exception e) { return e.getMessage(); }
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+
         return sb.length() == 0 ? "None" : sb.toString();
     }
+
 
     @Override
     public String getFreeParking() {
@@ -146,7 +163,15 @@ public class ParkingRepository implements IParkingRepository {
     public void showAllParkingStatus() {
         try (Statement st = db.getConnection().createStatement()) {
             ResultSet rs = st.executeQuery("SELECT spot_number FROM parking_spots");
-            while (rs.next()) { System.out.println("Spot: " + rs.getInt(1)); }
-        } catch (Exception e) {}
+            while (rs.next()) {
+                System.out.println("Spot: " + rs.getInt(1));
+            }
+        } catch (Exception e) {
+        }
     }
-}
+        private boolean isForever(Timestamp end) {
+            if (end == null) return false;
+            long days = Duration.between(Instant.now(), end.toInstant()).toDays();
+            return days > 36500;
+        }
+    }

@@ -21,8 +21,7 @@ public class ParkingController {
         return repo.getMyParking(userId);
     }
 
-    public String getFreeParking() {
-        return repo.getFreeParking();
+    public String getFreeParking() {return repo.getFreeParking();
     }
 
     public String buyParking(int userId, int spot, String phone, String car, int months) {
