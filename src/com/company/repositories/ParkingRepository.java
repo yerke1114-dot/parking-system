@@ -56,7 +56,7 @@ public class ParkingRepository implements IParkingRepository {
         StringBuilder sb = new StringBuilder();
         try (Connection conn = db.getConnection()) {
             sb.append("\n===============================================================\n");
-            sb.append("                 🅿️  PARKING AVAILABILITY SYSTEM\n");
+            sb.append("                 PARKING AVAILABILITY SYSTEM\n");
             sb.append("===============================================================\n");
 
             try (PreparedStatement st = conn.prepareStatement(statsSql);

@@ -11,6 +11,6 @@ public class AdminController {
     }
 
     public void showAllParkingStatus() {
-        repo.showAllParkingStatus();
+        repo.showAdminDashboard();
     }
 }
