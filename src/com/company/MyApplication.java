@@ -8,6 +8,8 @@ import com.company.models.AuthUser;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.company.ParkingUI.scanner;
+
 public class MyApplication {
 
     private final AuthorizationInterface auth;
@@ -254,29 +256,41 @@ public class MyApplication {
         System.out.println("New balance: " + controller.getBalance(userId) + "$");
     }
 
-    private void adminMenu(AuthUser admin) {
+    private void adminMenu(AuthUser user) {
         while (true) {
-            ParkingUI.printHeader("ADMIN CONTROL PANEL | " + admin.getUsername());
+            try {
+                System.out.println("\n==========================================");
+                System.out.println("       ADMIN CONTROL PANEL");
+                System.out.println("==========================================");
+                System.out.println("01. Show Strategic Dashboard");
+                System.out.println("02. Manual Balance Top-up");
+                System.out.println("00. Logout");
+                System.out.println("------------------------------------------");
+                System.out.print("Execute Action: ");
 
-            Map<Integer, Runnable> actions = new LinkedHashMap<>();
-            actions.put(1, adminController::showAllParkingStatus);
-            actions.put(0, () -> { /* logout */ });
+                String input = scanner.next();
+                int action = Integer.parseInt(input);
 
-            System.out.println(" [1] Show all parking zones (owner + end date)");
-            System.out.println(" [0] Logout");
-
-            int choice = ParkingUI.readInt("Execute");
-            if (choice == 0) {
-                System.out.println("Admin logged out.\n");
-                return;
+                switch (action) {
+                    case 1:
+                        adminController.showDashboard();
+                        break;
+                    case 2:
+                        System.out.print("Enter Username: ");
+                        String targetUser = scanner.next();
+                        System.out.print("Enter Amount to Add: ");
+                        double money = scanner.nextDouble();
+                        adminController.topUpUser(targetUser, money);
+                        break;
+                    case 0:
+                        return;
+                    default:
+                        System.out.println("Invalid selection.");
+                }
+            } catch (Exception e) {
+                System.out.println(" ERROR: Invalid input! Please enter NUMBERS only.");
+                scanner.nextLine();
             }
-
-            Runnable action = actions.get(choice);
-            if (action == null) {
-                System.out.println(" [!] Invalid option.");
-                continue;
-            }
-            action.run();
         }
     }
-}
+    }

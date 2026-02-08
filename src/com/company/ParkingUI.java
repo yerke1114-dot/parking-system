@@ -3,7 +3,7 @@ package com.company;
 import java.util.Scanner;
 
 public class ParkingUI {
-    private static final Scanner scanner = new Scanner(System.in);
+    static final Scanner scanner = new Scanner(System.in);
     private static final String LINE = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
 
     public static void printLogo(String name) {
