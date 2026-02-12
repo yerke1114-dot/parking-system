@@ -173,13 +173,34 @@ public class MyApplication {
         String myOrders = controller.getMyParking(userId);
         System.out.println(myOrders);
 
-        if (myOrders.contains("No active parking.")) {
+        if (myOrders.contains("No active parking.") || myOrders.equals("None")) {
             return;
         }
 
         int spot = ParkingUI.readInt("Spot number to extend");
-        if (!myOrders.contains("Spot: " + spot)) {
+
+        String[] lines = myOrders.split("\n");
+        boolean isPermanent = false;
+        boolean foundSpot = false;
+
+        for (String line : lines) {
+            if (line.contains("Spot: " + spot)) {
+                foundSpot = true;
+                if (line.contains("Forever")) {
+                    isPermanent = true;
+                }
+                break;
+            }
+        }
+
+        if (!foundSpot) {
             System.out.println("Error: Spot #" + spot + " is not your active parking!");
+            return;
+        }
+
+        if (isPermanent) {
+            System.out.println("\n[!] ACCESS DENIED: This spot is already owned PERMANENTLY.");
+            System.out.println("[!] No extension is needed or allowed for this spot.");
             return;
         }
 
@@ -293,4 +314,4 @@ public class MyApplication {
             }
         }
     }
-    }
+}
