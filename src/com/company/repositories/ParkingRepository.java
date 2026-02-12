@@ -5,7 +5,6 @@ import com.company.repositories.interfaces.IParkingRepository;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.sql.Timestamp;
 
 public class ParkingRepository implements IParkingRepository {
     private final IDB db;
@@ -44,7 +43,6 @@ public class ParkingRepository implements IParkingRepository {
 
     @Override
     public String getFreeParking() {
-
         String statsSql = "SELECT c.name, COUNT(ps.spot_number) as available_count FROM parking_spots ps " +
                 "JOIN categories c ON ps.category_id = c.id WHERE ps.spot_number NOT IN " +
                 "(SELECT spot_number FROM parking_orders WHERE status = 'ACTIVE') GROUP BY c.name";
@@ -80,7 +78,6 @@ public class ParkingRepository implements IParkingRepository {
 
                     if (!catName.equals(currentCategory)) {
                         if (!currentCategory.isEmpty()) {
-
                             while (countInRow < 5) { sb.append("│           "); countInRow++; }
                             sb.append("│\n└─────────────────────────────────────────────────────────────┘\n");
                         }
@@ -134,11 +131,35 @@ public class ParkingRepository implements IParkingRepository {
 
     @Override
     public String extendOrder(int userId, int spot, int months) {
-        String sql = "UPDATE parking_orders SET end_date = end_date + (? || ' months')::interval WHERE \"User_ID\" = ? AND spot_number = ?";
-        try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, months); st.setInt(2, userId); st.setInt(3, spot);
-            return st.executeUpdate() > 0 ? "Extended" : "Fail";
-        } catch (Exception e) { return e.getMessage(); }
+        String checkSql = "SELECT end_date FROM parking_orders WHERE \"User_ID\" = ? AND spot_number = ? AND status = 'ACTIVE'";
+
+        try (Connection conn = db.getConnection()) {
+            try (PreparedStatement checkSt = conn.prepareStatement(checkSql)) {
+                checkSt.setInt(1, userId);
+                checkSt.setInt(2, spot);
+                ResultSet rs = checkSt.executeQuery();
+
+                if (rs.next()) {
+                    Timestamp currentEnd = rs.getTimestamp("end_date");
+                    if (isForever(currentEnd)) {
+                        return "Fail: This spot is already owned PERMANENTLY. No extension needed!";
+                    }
+                } else {
+                    return "Order not found or inactive.";
+                }
+            }
+            String updateSql = "UPDATE parking_orders SET end_date = end_date + (? || ' months')::interval " +
+                    "WHERE \"User_ID\" = ? AND spot_number = ?";
+            try (PreparedStatement st = conn.prepareStatement(updateSql)) {
+                st.setInt(1, months);
+                st.setInt(2, userId);
+                st.setInt(3, spot);
+                return st.executeUpdate() > 0 ? "Extended" : "Fail to update";
+            }
+
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
     }
 
     @Override
@@ -169,9 +190,10 @@ public class ParkingRepository implements IParkingRepository {
         } catch (Exception e) {
         }
     }
-        private boolean isForever(Timestamp end) {
-            if (end == null) return false;
-            long days = Duration.between(Instant.now(), end.toInstant()).toDays();
-            return days > 36500;
-        }
+
+    private boolean isForever(Timestamp end) {
+        if (end == null) return false;
+        long days = Duration.between(Instant.now(), end.toInstant()).toDays();
+        return days > 36500;
     }
+}
