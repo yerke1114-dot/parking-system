@@ -53,9 +53,9 @@ public class ParkingRepository implements IParkingRepository {
 
         StringBuilder sb = new StringBuilder();
         try (Connection conn = db.getConnection()) {
-            sb.append("\n===============================================================\n");
+            sb.append("\n┌─────────────────────────────────────────────────────────────┐\n");
             sb.append("                 PARKING AVAILABILITY SYSTEM\n");
-            sb.append("===============================================================\n");
+            sb.append("└─────────────────────────────────────────────────────────────┘\n");
 
             try (PreparedStatement st = conn.prepareStatement(statsSql);
                  ResultSet rs = st.executeQuery()) {
@@ -64,7 +64,7 @@ public class ParkingRepository implements IParkingRepository {
                             rs.getString("name").toUpperCase(), rs.getInt("available_count")));
                 }
             }
-            sb.append("---------------------------------------------------------------\n");
+            sb.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
             try (PreparedStatement st = conn.prepareStatement(detailSql);
                  ResultSet rs = st.executeQuery()) {

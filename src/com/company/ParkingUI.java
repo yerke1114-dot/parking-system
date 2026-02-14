@@ -33,13 +33,4 @@ public class ParkingUI {
         return scanner.next();
     }
 
-    public static int calculatePrice(int months) {
-        return switch (months) {
-            case 0 -> 5000;
-            case 1 -> 200;
-            case 3 -> 550;
-            case 6 -> 1000;
-            default -> 0;
-        };
-    }
 }

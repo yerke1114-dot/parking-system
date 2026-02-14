@@ -123,7 +123,7 @@ public class MyApplication {
         System.out.println(" [6] 6 months (1000$)");
         int months = ParkingUI.readInt("Plan");
 
-        int price = ParkingUI.calculatePrice(months);
+        int price = ParkingController.calculatePrice(months);
         if (price == 0) {
             System.out.println("Plan must be 0, 1, 3 or 6.");
             return;
@@ -210,7 +210,7 @@ public class MyApplication {
         System.out.println(" [6] +6 months (1000$)");
 
         int extraMonths = ParkingUI.readInt("Months");
-        int price = ParkingUI.calculatePrice(extraMonths);
+        int price = ParkingController.calculatePrice(extraMonths);
 
         if (price == 0 || extraMonths == 0) {
             System.out.println("Invalid plan.");
@@ -277,16 +277,18 @@ public class MyApplication {
         System.out.println("New balance: " + controller.getBalance(userId) + "$");
     }
 
+
+
     private void adminMenu(AuthUser user) {
         while (true) {
             try {
-                System.out.println("\n==========================================");
+                System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                 System.out.println("       ADMIN CONTROL PANEL");
-                System.out.println("==========================================");
+                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                 System.out.println("01. Show Strategic Dashboard");
                 System.out.println("02. Manual Balance Top-up");
                 System.out.println("00. Logout");
-                System.out.println("------------------------------------------");
+                System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
                 System.out.print("Execute Action: ");
 
                 String input = scanner.next();
